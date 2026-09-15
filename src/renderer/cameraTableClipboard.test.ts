@@ -32,7 +32,8 @@ const list: CameraList = {
       displayNote: "Wide",
       notes: "",
       viewportOverride: null,
-      zoomOverride: null
+      zoomOverride: null,
+    displayMode: "default"
     },
     {
       id: "camera-b",
@@ -46,7 +47,8 @@ const list: CameraList = {
       displayNote: "Close",
       notes: "",
       viewportOverride: { width: 1280, height: 720 },
-      zoomOverride: 1.05
+      zoomOverride: 1.05,
+      displayMode: "default" as const
     }
   ]
 };
@@ -73,7 +75,7 @@ describe("camera table selection", () => {
         ),
         2
       )
-    ).toEqual({ rowStart: 0, rowEnd: 1, columnStart: 0, columnEnd: 8 });
+    ).toEqual({ rowStart: 0, rowEnd: 1, columnStart: 0, columnEnd: 9 });
 
     expect(
       cameraTableSelectionBounds(
@@ -119,7 +121,7 @@ describe("camera table serialization", () => {
         list,
         createCameraTableSelection("rows", { rowIndex: 0, columnIndex: 0 })
       )
-    ).toBe("TRUE\tA\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\t\t");
+    ).toBe("TRUE\tA\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\tDefault\t\t");
 
     expect(
       serializeCameraTableSelection(
@@ -137,16 +139,16 @@ describe("camera table serialization", () => {
     const output = serializeWholeCameraTable(list);
 
     expect(output.split("\n")[0]).toBe(
-      "Index\tCamera #\tFull URL\tType\tLens\tDisplay Note\tViewport\tZoom"
+      "Index\tCamera #\tFull URL\tType\tLens\tDisplay Note\tDisplay\tViewport\tZoom"
     );
     expect(output.split("\n")[1]).toBe(
-      "A\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\t\t"
+      "A\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\tDefault\t\t"
     );
     expect(output.split("\n")[2]).toBe(
-      "B\t02\thttp://10.20.100.55/rmt.html\tFR7\t50mm\tClose\t1280x720\t1.05"
+      "B\t02\thttp://10.20.100.55/rmt.html\tFR7\t50mm\tClose\tDefault\t1280x720\t1.05"
     );
     expect(output).not.toContain("Follow Prefix");
-    expect(CAMERA_TABLE_COLUMNS).toHaveLength(9);
+    expect(CAMERA_TABLE_COLUMNS).toHaveLength(10);
   });
 });
 
@@ -244,6 +246,7 @@ describe("camera table paste", () => {
       lens: "35mm",
       viewportOverride: { width: 1200, height: 800 },
       zoomOverride: 1.25,
+      displayMode: "default" as const,
       usesListPrefix: true
     });
     expect(result?.selection.anchor.rowIndex).toBe(0);
@@ -269,6 +272,7 @@ describe("camera table paste", () => {
       url: "http://10.20.100.107/index",
       displayNote: "Stage Right",
       zoomOverride: 1.05,
+      displayMode: "default" as const,
       usesListPrefix: false
     });
   });
@@ -286,6 +290,7 @@ describe("camera table paste", () => {
       cameraType: "FR7",
       viewportOverride: null,
       zoomOverride: null,
+    displayMode: "default",
       usesListPrefix: true
     });
   });
@@ -323,7 +328,7 @@ describe("camera table paste", () => {
   it("reports positional cells beyond the final data column", () => {
     const result = pasteCameraTableText(
       list,
-      { rowIndex: 0, columnIndex: 8 },
+      { rowIndex: 0, columnIndex: 9 },
       "1.1\textra"
     );
 
@@ -332,7 +337,7 @@ describe("camera table paste", () => {
       expect.objectContaining({
         sourceRow: 1,
         cameraRow: 1,
-        column: "Column 10",
+        column: "Column 11",
         value: "extra"
       })
     ]);

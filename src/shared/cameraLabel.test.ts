@@ -13,7 +13,8 @@ const baseCamera: CameraEntry = {
   displayNote: "",
   notes: "",
   viewportOverride: null,
-  zoomOverride: null
+  zoomOverride: null,
+    displayMode: "default"
 };
 
 describe("formatCameraLabel", () => {

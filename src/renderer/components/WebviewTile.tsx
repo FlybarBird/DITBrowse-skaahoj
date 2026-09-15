@@ -6,6 +6,10 @@ import type { CapturedCredential, CredentialFill } from "../../shared/credential
 import type { HostPingStatus } from "../../shared/hostPing";
 import { DEFAULT_HOST_PING_INTERVAL_SECONDS } from "../../shared/hostPing";
 import { CAMERA_WEBVIEW_USER_AGENT } from "../../shared/cameraWebviewUserAgent";
+import {
+  ARRI_LPS_ISOLATE_SCRIPT,
+  isArriLpsCameraPath
+} from "../../shared/cameraDisplayMode";
 import type { TileState } from "../../shared/types";
 import { normalizeCameraUrl } from "../../shared/url";
 import {
@@ -86,6 +90,15 @@ function redirectSonyRootPage(
       }
     })
     .catch(() => undefined);
+}
+
+function applyArriLpsMode(webview: Electron.WebviewTag): void {
+  const currentUrl = typeof webview.getURL === "function" ? webview.getURL() : "";
+  if (!isArriLpsCameraPath(currentUrl) || typeof webview.executeJavaScript !== "function") {
+    return;
+  }
+
+  void webview.executeJavaScript(ARRI_LPS_ISOLATE_SCRIPT, true).catch(() => undefined);
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -316,6 +329,9 @@ function WebviewTileComponent({
       }
 
       redirectSonyRootPage(webview, commitSonyRootRedirect);
+      if (tile.displayMode === "arriLps") {
+        applyArriLpsMode(webview);
+      }
     };
     const commitNavigationUrl = (event: Event): void => {
       const navigationEvent = event as Event & { url?: string; isMainFrame?: boolean };
@@ -386,8 +402,28 @@ function WebviewTileComponent({
     onUrlCommitted,
     savedCredential,
     tile.id,
+    tile.displayMode,
     commitSonyRootRedirect
   ]);
+
+  useEffect(() => {
+    if (!initialLoadReady || tile.displayMode !== "arriLps") {
+      return;
+    }
+
+    const webview = webviewRef.current;
+    if (!webview) {
+      return;
+    }
+
+    const timeouts = [250, 1000, 2500, 5000].map((delay) =>
+      window.setTimeout(() => applyArriLpsMode(webview), delay)
+    );
+
+    return () => {
+      timeouts.forEach((timeout) => window.clearTimeout(timeout));
+    };
+  }, [initialLoadReady, tile.displayMode, webviewUrl]);
 
   useEffect(() => {
     const webview = webviewRef.current;

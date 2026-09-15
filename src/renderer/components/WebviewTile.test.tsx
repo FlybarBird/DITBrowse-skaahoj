@@ -31,7 +31,8 @@ const tile: TileState = {
   title: "Camera 42",
   partition: "persist:ditbrowse-job-list",
   viewport: { width: 1024, height: 768 },
-  zoom: 1
+  zoom: 1,
+    displayMode: "default"
 };
 
 function resizeTile(width: number, height: number): void {
@@ -1123,6 +1124,38 @@ describe("WebviewTile", () => {
     expect(onUrlCommitted).toHaveBeenCalledWith(
       "tile-42",
       "http://10.20.100.104/rmt.html"
+    );
+  });
+
+  it("isolates the ARRI LPS iframe when display mode is arriLps", async () => {
+    render(
+      <WebviewTile
+        tile={{
+          ...tile,
+          url: "http://10.201.20.101/camera",
+          displayMode: "arriLps"
+        }}
+        selected={true}
+        onSelectTile={vi.fn()}
+        onUrlCommitted={vi.fn()}
+        onCredentialCaptured={vi.fn()}
+        savedCredential={null}
+        webviewPreloadPath={null}
+      />
+    );
+
+    const webview = document.querySelector("webview") as Electron.WebviewTag;
+    webview.getURL = vi.fn(() => "http://10.201.20.101/camera");
+    const executeJavaScript = vi.fn(async (_code: string, _userGesture?: boolean) => true);
+    webview.executeJavaScript = executeJavaScript;
+
+    fireEvent(webview, new Event("did-finish-load"));
+
+    await waitFor(() => {
+      expect(executeJavaScript).toHaveBeenCalled();
+    });
+    expect(String(executeJavaScript.mock.calls[0]?.[0])).toContain(
+      'iframe[title="Camera UI"]'
     );
   });
 

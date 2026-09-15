@@ -205,7 +205,8 @@ describe("workspaceReducer", () => {
           title: "about:blank",
           partition: "persist:ditbrowse-job-sample-list-sample",
           viewport: { width: 1280, height: 720 },
-          zoom: 1
+          zoom: 1,
+        displayMode: "default" as const
         }
       ]
     };
@@ -999,7 +1000,8 @@ describe("workspaceReducer", () => {
           title: "http://10.20.100.2",
           partition: "persist:ditbrowse-job-sample-list-sample",
           viewport: { width: 1280, height: 720 },
-          zoom: 1
+          zoom: 1,
+        displayMode: "default" as const
         }
       ]
     };
@@ -1397,7 +1399,8 @@ describe("workspaceReducer", () => {
       title: "about:blank",
       partition: "persist:ditbrowse-job-sample-list-sample",
       viewport: { width: 1024, height: 768 },
-      zoom: 1
+      zoom: 1,
+    displayMode: "default" as const
     };
     const mixedWorkspace = {
       ...sampleWorkspace,
@@ -1450,7 +1453,8 @@ describe("workspaceReducer", () => {
       title: "about:blank",
       partition: "persist:ditbrowse-job-sample-list-sample",
       viewport: { width: 1024, height: 768 },
-      zoom: 1
+      zoom: 1,
+    displayMode: "default" as const
     };
     const mixedWorkspace = {
       ...sampleWorkspace,

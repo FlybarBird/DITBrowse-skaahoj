@@ -29,7 +29,8 @@ export const sampleWorkspace: WorkspaceState = {
           displayNote: "",
           notes: "",
           viewportOverride: null,
-          zoomOverride: null
+          zoomOverride: null,
+          displayMode: "default"
         };
       })
     }
@@ -51,7 +52,8 @@ export const sampleWorkspace: WorkspaceState = {
       displayNote: "",
       notes: "",
       viewportOverride: null,
-      zoomOverride: null
+      zoomOverride: null,
+      displayMode: "default" as const
     };
     return {
       id: `tile-${idSuffix}`,
@@ -60,7 +62,8 @@ export const sampleWorkspace: WorkspaceState = {
       title: formatCameraLabel(camera),
       partition: "persist:ditbrowse-job-sample-list-sample",
       viewport: DEFAULT_VIEWPORT,
-      zoom: 1
+      zoom: 1,
+      displayMode: "default" as const
     };
   }),
   selectedTileId: "tile-41",

@@ -20,7 +20,8 @@ function camera(name: string, suffix: string): CameraEntry {
     displayNote: "",
     notes: "",
     viewportOverride: null,
-    zoomOverride: null
+    zoomOverride: null,
+    displayMode: "default"
   };
 }
 

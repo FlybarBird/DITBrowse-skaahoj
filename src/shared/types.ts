@@ -1,3 +1,7 @@
+import type { CameraDisplayMode } from "./cameraDisplayMode.js";
+
+export type { CameraDisplayMode } from "./cameraDisplayMode.js";
+
 export interface ViewportSize {
   width: number;
   height: number;
@@ -16,6 +20,8 @@ export interface CameraEntry {
   notes: string;
   viewportOverride: ViewportSize | null;
   zoomOverride: number | null;
+  /** Guest-page layout mode (e.g. Arri LPS isolates the Camera UI iframe). */
+  displayMode: CameraDisplayMode;
 }
 
 export interface CameraList {
@@ -40,6 +46,7 @@ export interface TileState {
   partition: string;
   viewport: ViewportSize;
   zoom: number;
+  displayMode: CameraDisplayMode;
 }
 
 export interface PasswordRecord {

@@ -781,6 +781,22 @@ export function CameraListEditor({
                       <td {...cameraCellProps(rowIndex, 7)}>
                         <select
                           {...cameraControlProps(rowIndex, 7)}
+                          value={camera.displayMode ?? "default"}
+                          onChange={(event) =>
+                            updateDraftCamera(camera.id, {
+                              displayMode:
+                                event.target.value === "arriLps" ? "arriLps" : "default"
+                            })
+                          }
+                          aria-label={`${camera.name} display mode`}
+                        >
+                          <option value="default">Default</option>
+                          <option value="arriLps">Arri LPS</option>
+                        </select>
+                      </td>
+                      <td {...cameraCellProps(rowIndex, 8)}>
+                        <select
+                          {...cameraControlProps(rowIndex, 8)}
                           value={cameraViewportValue(camera)}
                           onChange={(event) => {
                             if (!event.target.value) {
@@ -808,9 +824,9 @@ export function CameraListEditor({
                           ))}
                         </select>
                       </td>
-                      <td {...cameraCellProps(rowIndex, 8)}>
+                      <td {...cameraCellProps(rowIndex, 9)}>
                         <input
-                          {...cameraControlProps(rowIndex, 8)}
+                          {...cameraControlProps(rowIndex, 9)}
                           type="number"
                           min="0.25"
                           max="3"

@@ -1,5 +1,7 @@
 import type { CSSProperties, ReactElement, ReactNode } from "react";
 import { useEffect, useState } from "react";
+import type { CameraDisplayMode } from "../../shared/cameraDisplayMode";
+import { CAMERA_DISPLAY_MODE_OPTIONS } from "../../shared/cameraDisplayMode";
 import type { ViewportSize } from "../../shared/types";
 import {
   VIEWPORT_PRESETS,
@@ -108,11 +110,13 @@ interface GridControlsProps {
   selectedZoom: number;
   globalZoom: number;
   selectedViewport: ViewportSize | null;
+  selectedDisplayMode: CameraDisplayMode | null;
   onColumnsChange: (columns: number) => void;
   onRelativeGlobalZoomChange: (factor: number) => void;
   onGlobalViewportChange: (viewport: ViewportSize) => void;
   onZoomChange: (zoom: number) => void;
   onViewportChange: (viewport: ViewportSize) => void;
+  onDisplayModeChange: (displayMode: CameraDisplayMode) => void;
   icon?: ReactNode;
 }
 
@@ -121,11 +125,13 @@ export function GridControls({
   selectedZoom,
   globalZoom,
   selectedViewport,
+  selectedDisplayMode,
   onColumnsChange,
   onRelativeGlobalZoomChange,
   onGlobalViewportChange,
   onZoomChange,
   onViewportChange,
+  onDisplayModeChange,
   icon
 }: GridControlsProps): ReactElement {
   const [globalZoomOpen, setGlobalZoomOpen] = useState(false);
@@ -234,6 +240,25 @@ export function GridControls({
           </div>
         )}
       </div>
+      <label className="grid-control resolution-control">
+        <span>Display</span>
+        <select
+          value={selectedDisplayMode ?? ""}
+          disabled={!selectedDisplayMode}
+          onChange={(event) =>
+            onDisplayModeChange(
+              event.target.value === "arriLps" ? "arriLps" : "default"
+            )
+          }
+          aria-label="Selected camera display mode"
+        >
+          {CAMERA_DISPLAY_MODE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="grid-control resolution-control">
         <span>Resolution</span>
         <select

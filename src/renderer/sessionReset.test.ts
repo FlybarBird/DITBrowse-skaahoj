@@ -14,7 +14,8 @@ function tile(id: string, url: string): TileState {
     title: id,
     partition: "persist:list",
     viewport: { width: 1024, height: 768 },
-    zoom: 1
+    zoom: 1,
+    displayMode: "default"
   };
 }
 

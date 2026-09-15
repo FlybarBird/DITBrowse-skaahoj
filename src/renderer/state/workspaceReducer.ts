@@ -19,6 +19,10 @@ import {
   resolveCameraAddressWithStablePath
 } from "../../shared/url";
 import {
+  DEFAULT_CAMERA_DISPLAY_MODE,
+  normalizeCameraDisplayMode
+} from "../../shared/cameraDisplayMode";
+import {
   DEFAULT_VIEWPORT,
   LEGACY_DEFAULT_VIEWPORT,
   sameViewport
@@ -45,6 +49,7 @@ export type CameraEntryPatch = Partial<
     | "notes"
     | "viewportOverride"
     | "zoomOverride"
+    | "displayMode"
   >
 >;
 
@@ -119,7 +124,8 @@ function createTilesForList(
     title: formatCameraLabel(camera),
     partition: `persist:ditbrowse-${list.jobId}-${list.id}`,
     viewport: camera.viewportOverride ?? state.defaultViewport,
-    zoom: camera.zoomOverride ?? state.defaultZoom
+    zoom: camera.zoomOverride ?? state.defaultZoom,
+    displayMode: normalizeCameraDisplayMode(camera.displayMode)
   }));
 }
 
@@ -285,6 +291,13 @@ function applyCameraEntryPatch(
     };
   }
 
+  if ("displayMode" in patch) {
+    next = {
+      ...next,
+      displayMode: normalizeCameraDisplayMode(patch.displayMode)
+    };
+  }
+
   return next;
 }
 
@@ -301,7 +314,8 @@ function normalizeWorkspaceState(workspace: WorkspaceState): WorkspaceState {
         const normalizedCamera = {
           ...camera,
           url: normalizeCameraUrl(camera.url),
-          prefixOverride: normalizeCameraPrefix(camera.prefixOverride)
+          prefixOverride: normalizeCameraPrefix(camera.prefixOverride),
+          displayMode: normalizeCameraDisplayMode(camera.displayMode)
         };
         return cameraUsesListPrefix(camera, list.defaultPrefix) ||
           cameraUsesListPrefix(normalizedCamera, defaultPrefix)
@@ -316,15 +330,25 @@ function normalizeWorkspaceState(workspace: WorkspaceState): WorkspaceState {
   const tiles = workspace.tiles.map((tile) => {
     const camera = tile.cameraId ? camerasById.get(tile.cameraId) : null;
     if (!camera) {
-      return sameViewport(tile.viewport, LEGACY_DEFAULT_VIEWPORT)
-        ? { ...tile, viewport: defaultViewport }
-        : tile;
+      return {
+        ...tile,
+        displayMode: normalizeCameraDisplayMode(tile.displayMode),
+        ...(sameViewport(tile.viewport, LEGACY_DEFAULT_VIEWPORT)
+          ? { viewport: defaultViewport }
+          : {})
+      };
     }
 
     const viewport =
       camera.viewportOverride ??
       (sameViewport(tile.viewport, LEGACY_DEFAULT_VIEWPORT) ? defaultViewport : tile.viewport);
-    return { ...tile, url: camera.url, title: formatCameraLabel(camera), viewport };
+    return {
+      ...tile,
+      url: camera.url,
+      title: formatCameraLabel(camera),
+      viewport,
+      displayMode: normalizeCameraDisplayMode(camera.displayMode)
+    };
   });
   let passwordRecords = workspace.passwordRecords;
 
@@ -373,7 +397,8 @@ function createCameraTile(
     title: formatCameraLabel(camera),
     partition: `persist:ditbrowse-${list.jobId}-${list.id}`,
     viewport: camera.viewportOverride ?? state.defaultViewport,
-    zoom: camera.zoomOverride ?? state.defaultZoom
+    zoom: camera.zoomOverride ?? state.defaultZoom,
+    displayMode: normalizeCameraDisplayMode(camera.displayMode)
   };
 }
 
@@ -543,7 +568,8 @@ export function workspaceReducer(
                 url: updatedCamera.url,
                 title: formatCameraLabel(updatedCamera),
                 viewport: updatedCamera.viewportOverride ?? state.defaultViewport,
-                zoom: updatedCamera.zoomOverride ?? state.defaultZoom
+                zoom: updatedCamera.zoomOverride ?? state.defaultZoom,
+                displayMode: normalizeCameraDisplayMode(updatedCamera.displayMode)
               }
             : tile
         )
@@ -590,7 +616,8 @@ export function workspaceReducer(
                 url: committedUrl,
                 title: formatCameraLabel(camera),
                 viewport: camera.viewportOverride ?? state.defaultViewport,
-                zoom: camera.zoomOverride ?? state.defaultZoom
+                zoom: camera.zoomOverride ?? state.defaultZoom,
+                displayMode: normalizeCameraDisplayMode(camera.displayMode)
               }
             : tile
         )
@@ -630,7 +657,8 @@ export function workspaceReducer(
                 url: updatedCamera.url,
                 title: formatCameraLabel(updatedCamera),
                 viewport: updatedCamera.viewportOverride ?? state.defaultViewport,
-                zoom: updatedCamera.zoomOverride ?? state.defaultZoom
+                zoom: updatedCamera.zoomOverride ?? state.defaultZoom,
+                displayMode: normalizeCameraDisplayMode(updatedCamera.displayMode)
               }
             : tile
         )
@@ -653,7 +681,8 @@ export function workspaceReducer(
             title: url,
             partition: `persist:ditbrowse-${activeJobId}-${activeCameraListId}`,
             viewport: state.defaultViewport,
-            zoom: state.defaultZoom
+            zoom: state.defaultZoom,
+            displayMode: DEFAULT_CAMERA_DISPLAY_MODE
           }
         ]
       };
@@ -681,7 +710,8 @@ export function workspaceReducer(
           displayNote: row.displayNote,
           notes: row.notes,
           viewportOverride: null,
-          zoomOverride: null
+          zoomOverride: null,
+          displayMode: DEFAULT_CAMERA_DISPLAY_MODE
         };
       });
 
@@ -696,7 +726,8 @@ export function workspaceReducer(
         title: formatCameraLabel(camera),
         partition: `persist:ditbrowse-${activeList.jobId}-${activeList.id}`,
         viewport: camera.viewportOverride ?? state.defaultViewport,
-        zoom: camera.zoomOverride ?? state.defaultZoom
+        zoom: camera.zoomOverride ?? state.defaultZoom,
+        displayMode: normalizeCameraDisplayMode(camera.displayMode)
       }));
 
       return {
@@ -1026,7 +1057,8 @@ export function workspaceReducer(
             title: formatCameraLabel(camera),
             url: camera.url,
             viewport: camera.viewportOverride ?? state.defaultViewport,
-            zoom: camera.zoomOverride ?? state.defaultZoom
+            zoom: camera.zoomOverride ?? state.defaultZoom,
+            displayMode: normalizeCameraDisplayMode(camera.displayMode)
           };
         })
       };
@@ -1191,7 +1223,8 @@ export function workspaceReducer(
         displayNote: "",
         notes: "",
         viewportOverride: null,
-        zoomOverride: null
+        zoomOverride: null,
+        displayMode: DEFAULT_CAMERA_DISPLAY_MODE
       };
       const updatedList = { ...activeList, cameras: [...activeList.cameras, camera] };
       const tile = createTilesForList(state, { ...updatedList, cameras: [camera] })[0];
