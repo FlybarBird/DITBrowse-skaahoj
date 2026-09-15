@@ -38,7 +38,6 @@ const baseProps = {
   onGlobalViewportChange: vi.fn(),
   onZoomChange: vi.fn(),
   onViewportChange: vi.fn(),
-  onDisplayModeChange: vi.fn(),
   expansionEnabled: true,
   focusMode: false,
   onFocusModeToggle: vi.fn()

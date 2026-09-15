@@ -75,7 +75,7 @@ describe("camera table selection", () => {
         ),
         2
       )
-    ).toEqual({ rowStart: 0, rowEnd: 1, columnStart: 0, columnEnd: 9 });
+    ).toEqual({ rowStart: 0, rowEnd: 1, columnStart: 0, columnEnd: 8 });
 
     expect(
       cameraTableSelectionBounds(
@@ -121,7 +121,7 @@ describe("camera table serialization", () => {
         list,
         createCameraTableSelection("rows", { rowIndex: 0, columnIndex: 0 })
       )
-    ).toBe("TRUE\tA\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\tDefault\t\t");
+    ).toBe("TRUE\tA\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\t\t");
 
     expect(
       serializeCameraTableSelection(
@@ -139,16 +139,16 @@ describe("camera table serialization", () => {
     const output = serializeWholeCameraTable(list);
 
     expect(output.split("\n")[0]).toBe(
-      "Index\tCamera #\tFull URL\tType\tLens\tDisplay Note\tDisplay\tViewport\tZoom"
+      "Index\tCamera #\tFull URL\tType\tLens\tDisplay Note\tViewport\tZoom"
     );
     expect(output.split("\n")[1]).toBe(
-      "A\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\tDefault\t\t"
+      "A\t01\thttp://10.20.100.01\tVENICE 2\t35mm\tWide\t\t"
     );
     expect(output.split("\n")[2]).toBe(
-      "B\t02\thttp://10.20.100.55/rmt.html\tFR7\t50mm\tClose\tDefault\t1280x720\t1.05"
+      "B\t02\thttp://10.20.100.55/rmt.html\tFR7\t50mm\tClose\t1280x720\t1.05"
     );
     expect(output).not.toContain("Follow Prefix");
-    expect(CAMERA_TABLE_COLUMNS).toHaveLength(10);
+    expect(CAMERA_TABLE_COLUMNS).toHaveLength(9);
   });
 });
 
@@ -328,7 +328,7 @@ describe("camera table paste", () => {
   it("reports positional cells beyond the final data column", () => {
     const result = pasteCameraTableText(
       list,
-      { rowIndex: 0, columnIndex: 9 },
+      { rowIndex: 0, columnIndex: 8 },
       "1.1\textra"
     );
 
@@ -337,7 +337,7 @@ describe("camera table paste", () => {
       expect.objectContaining({
         sourceRow: 1,
         cameraRow: 1,
-        column: "Column 11",
+        column: "Column 10",
         value: "extra"
       })
     ]);

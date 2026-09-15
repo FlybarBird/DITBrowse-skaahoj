@@ -1,13 +1,14 @@
 import type { PointerEvent as ReactPointerEvent, ReactElement } from "react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Settings } from "lucide-react";
 import { computeFitScale } from "../../shared/scale";
 import type { CapturedCredential, CredentialFill } from "../../shared/credentials";
 import type { HostPingStatus } from "../../shared/hostPing";
 import { DEFAULT_HOST_PING_INTERVAL_SECONDS } from "../../shared/hostPing";
 import { CAMERA_WEBVIEW_USER_AGENT } from "../../shared/cameraWebviewUserAgent";
 import {
-  ARRI_LPS_ISOLATE_SCRIPT
+  cameraSiteRootUrl,
+  isArriLpsCameraPath
 } from "../../shared/cameraDisplayMode";
 import type { TileState } from "../../shared/types";
 import { normalizeCameraUrl } from "../../shared/url";
@@ -18,6 +19,7 @@ import {
 } from "../../shared/temporaryView";
 import { reloadWebviewFromCameraRoot } from "../browserControls";
 import { Button } from "./ui/Button";
+import { IconButton } from "./ui/IconButton";
 import { HostPingIndicator } from "./HostPingIndicator";
 
 const TILE_LABEL_HEIGHT = 24;
@@ -89,16 +91,6 @@ function redirectSonyRootPage(
       }
     })
     .catch(() => undefined);
-}
-
-function applyArriLpsMode(webview: Electron.WebviewTag): void {
-  if (typeof webview.executeJavaScript !== "function") {
-    return;
-  }
-
-  // Guest script self-detects LPS (Camera UI iframe / /camera / FBS chrome)
-  // and isolates that frame; non-LPS pages return "skip".
-  void webview.executeJavaScript(ARRI_LPS_ISOLATE_SCRIPT, true).catch(() => undefined);
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -329,7 +321,6 @@ function WebviewTileComponent({
       }
 
       redirectSonyRootPage(webview, commitSonyRootRedirect);
-      applyArriLpsMode(webview);
     };
     const commitNavigationUrl = (event: Event): void => {
       const navigationEvent = event as Event & { url?: string; isMainFrame?: boolean };
@@ -402,26 +393,6 @@ function WebviewTileComponent({
     tile.id,
     commitSonyRootRedirect
   ]);
-
-  useEffect(() => {
-    if (!initialLoadReady || isBlankWebviewUrl(webviewUrl)) {
-      return;
-    }
-
-    const webview = webviewRef.current;
-    if (!webview) {
-      return;
-    }
-
-    // Auto-detect LPS after load / SPA paint — not gated on Display mode.
-    const timeouts = [250, 750, 1500, 3000, 6000, 10000].map((delay) =>
-      window.setTimeout(() => applyArriLpsMode(webview), delay)
-    );
-
-    return () => {
-      timeouts.forEach((timeout) => window.clearTimeout(timeout));
-    };
-  }, [initialLoadReady, webviewUrl]);
 
   useEffect(() => {
     const webview = webviewRef.current;
@@ -573,6 +544,23 @@ function WebviewTileComponent({
     reloadWebviewFromCameraRoot(webview, tile.url);
   }, [tile.url]);
 
+  const openLpsSiteRoot = useCallback((): void => {
+    const webview = webviewRef.current;
+    const currentUrl =
+      (webview && typeof webview.getURL === "function" ? webview.getURL() : "") || webviewUrl;
+    const rootUrl = cameraSiteRootUrl(currentUrl);
+    if (!rootUrl) {
+      return;
+    }
+
+    setFailed(false);
+    committedNavigationRef.current = null;
+    setWebviewUrl(rootUrl);
+    onUrlCommitted(tile.id, rootUrl);
+  }, [onUrlCommitted, tile.id, webviewUrl]);
+
+  const showLpsSettings = isArriLpsCameraPath(webviewUrl);
+
   return (
     <div
       ref={containerRef}
@@ -622,6 +610,23 @@ function WebviewTileComponent({
             tabIndex={-1}
             aria-label={activationLabel}
             onPointerDown={handleInactivePointerDown}
+          />
+        )}
+        {showLpsSettings && (
+          <IconButton
+            className="tile-lps-settings"
+            label={`Open FBS settings for ${tile.title || tile.url || "camera"}`}
+            tooltip={{
+              title: "FBS settings",
+              description: "Leaves Camera Web Remote and opens the FBS site root (/)."
+            }}
+            icon={<Settings size={16} strokeWidth={2.2} />}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onSelectTile(tile.id);
+              openLpsSiteRoot();
+            }}
           />
         )}
       </div>

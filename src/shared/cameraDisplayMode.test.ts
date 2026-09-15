@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  ARRI_LPS_ISOLATE_SCRIPT,
+  cameraSiteRootUrl,
   isArriLpsCameraPath,
   normalizeCameraDisplayMode
 } from "./cameraDisplayMode";
@@ -20,10 +20,11 @@ describe("cameraDisplayMode", () => {
     expect(isArriLpsCameraPath("http://10.201.20.101/video")).toBe(false);
   });
 
-  it("exports a detect-and-isolate script for the Camera UI iframe", () => {
-    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain('iframe[title="Camera UI"]');
-    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("MutationObserver");
-    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("Camera Web Remote");
-    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("position:fixed");
+  it("builds the site root URL for leaving LPS", () => {
+    expect(cameraSiteRootUrl("http://10.201.20.101/camera")).toBe("http://10.201.20.101/");
+    expect(cameraSiteRootUrl("https://10.201.20.101:8443/camera?x=1")).toBe(
+      "https://10.201.20.101:8443/"
+    );
+    expect(cameraSiteRootUrl("about:blank")).toBeNull();
   });
 });

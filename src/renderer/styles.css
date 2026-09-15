@@ -1650,6 +1650,26 @@ textarea::selection {
   cursor: default;
 }
 
+.tile-lps-settings {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 4;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(12, 12, 14, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #f4f4f5;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.tile-lps-settings:hover,
+.tile-lps-settings:focus-visible {
+  background: rgba(24, 24, 28, 0.95);
+  color: #fff;
+}
+
 .tile-label {
   position: absolute;
   z-index: 2;

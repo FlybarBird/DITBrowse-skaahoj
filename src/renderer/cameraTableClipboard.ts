@@ -6,8 +6,7 @@ import {
 } from "../shared/cameraIndex";
 import {
   DEFAULT_CAMERA_DISPLAY_MODE,
-  normalizeCameraDisplayMode,
-  type CameraDisplayMode
+  normalizeCameraDisplayMode
 } from "../shared/cameraDisplayMode";
 import type { CameraEntry, CameraList } from "../shared/types";
 import { normalizeCameraPrefix, normalizeCameraUrl } from "../shared/url";
@@ -21,7 +20,6 @@ export const CAMERA_TABLE_COLUMNS = [
   { key: "cameraType", label: "Type" },
   { key: "lens", label: "Lens" },
   { key: "displayNote", label: "Display Note" },
-  { key: "displayMode", label: "Display" },
   { key: "viewportOverride", label: "Viewport" },
   { key: "zoomOverride", label: "Zoom" }
 ] as const;
@@ -273,8 +271,6 @@ function cameraTableCellValue(camera: CameraEntry, columnIndex: number): string 
       return camera.lens;
     case "displayNote":
       return camera.displayNote;
-    case "displayMode":
-      return camera.displayMode === "arriLps" ? "Arri LPS" : "Default";
     case "viewportOverride":
       return camera.viewportOverride
         ? `${camera.viewportOverride.width}x${camera.viewportOverride.height}`
@@ -342,7 +338,6 @@ const HEADER_ALIASES: Record<CameraTableColumnKey, readonly string[]> = {
   cameraType: ["type", "camera type", "camera_type"],
   lens: ["lens"],
   displayNote: ["display note", "display_note", "note", "notes"],
-  displayMode: ["display", "display mode", "mode", "arri lps", "lps"],
   viewportOverride: ["viewport", "view", "resolution"],
   zoomOverride: ["zoom", "scale"]
 };
@@ -354,7 +349,6 @@ const APPLY_PRIORITY: readonly CameraTableColumnKey[] = [
   "cameraType",
   "lens",
   "displayNote",
-  "displayMode",
   "viewportOverride",
   "zoomOverride",
   "usesListPrefix"
@@ -482,24 +476,6 @@ function parseAssignmentPatch(
       return { ok: true, patch: { lens: value } };
     case "displayNote":
       return { ok: true, patch: { displayNote: value } };
-    case "displayMode": {
-      const normalized = value.trim().toLowerCase();
-      if (!normalized || normalized === "default" || normalized === "full") {
-        return { ok: true, patch: { displayMode: DEFAULT_CAMERA_DISPLAY_MODE } };
-      }
-      if (
-        normalized === "arrilps" ||
-        normalized === "arri lps" ||
-        normalized === "arri-lps" ||
-        normalized === "lps"
-      ) {
-        return { ok: true, patch: { displayMode: "arriLps" satisfies CameraDisplayMode } };
-      }
-      return {
-        ok: false,
-        message: "Expected Default or Arri LPS."
-      };
-    }
     case "viewportOverride": {
       const viewportOverride = parseViewport(value);
       return viewportOverride === undefined

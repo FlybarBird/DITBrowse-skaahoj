@@ -9,7 +9,6 @@ import {
   Save
 } from "lucide-react";
 import type { TileState, ViewportSize } from "../../shared/types";
-import type { CameraDisplayMode } from "../../shared/cameraDisplayMode";
 import { AddressBar } from "./AddressBar";
 import { CameraSessionMenu } from "./CameraSessionMenu";
 import { GridControls } from "./GridControls";
@@ -41,7 +40,6 @@ interface BrowserToolbarProps {
   onGlobalViewportChange: (viewport: ViewportSize) => void;
   onZoomChange: (zoom: number) => void;
   onViewportChange: (viewport: ViewportSize) => void;
-  onDisplayModeChange: (displayMode: CameraDisplayMode) => void;
   expansionEnabled: boolean;
   focusMode: boolean;
   onFocusModeToggle: () => void;
@@ -72,7 +70,6 @@ export function BrowserToolbar({
   onGlobalViewportChange,
   onZoomChange,
   onViewportChange,
-  onDisplayModeChange,
   expansionEnabled,
   focusMode,
   onFocusModeToggle
@@ -175,13 +172,11 @@ export function BrowserToolbar({
           selectedZoom={selectedTile?.zoom ?? defaultZoom}
           globalZoom={globalZoom}
           selectedViewport={selectedTile?.viewport ?? null}
-          selectedDisplayMode={selectedTile?.displayMode ?? null}
           onColumnsChange={onColumnsChange}
           onRelativeGlobalZoomChange={onRelativeGlobalZoomChange}
           onGlobalViewportChange={onGlobalViewportChange}
           onZoomChange={onZoomChange}
           onViewportChange={onViewportChange}
-          onDisplayModeChange={onDisplayModeChange}
           icon={<Rows3 size={14} strokeWidth={2.2} />}
         />
       </div>

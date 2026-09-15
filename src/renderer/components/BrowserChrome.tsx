@@ -6,7 +6,6 @@ import type {
   ViewportSize,
   WorkspaceState
 } from "../../shared/types";
-import type { CameraDisplayMode } from "../../shared/cameraDisplayMode";
 import { BrowserToolbar } from "./BrowserToolbar";
 import { TabStrip } from "./TabStrip";
 import { Button } from "./ui/Button";
@@ -40,7 +39,6 @@ interface BrowserChromeProps {
   onGlobalViewportChange: (viewport: ViewportSize) => void;
   onZoomChange: (zoom: number) => void;
   onViewportChange: (viewport: ViewportSize) => void;
-  onDisplayModeChange: (displayMode: CameraDisplayMode) => void;
   expansionEnabled: boolean;
   focusMode: boolean;
   onFocusModeToggle: () => void;
@@ -75,7 +73,6 @@ export function BrowserChrome({
   onGlobalViewportChange,
   onZoomChange,
   onViewportChange,
-  onDisplayModeChange,
   expansionEnabled,
   focusMode,
   onFocusModeToggle
@@ -166,7 +163,6 @@ export function BrowserChrome({
           onGlobalViewportChange={onGlobalViewportChange}
           onZoomChange={onZoomChange}
           onViewportChange={onViewportChange}
-          onDisplayModeChange={onDisplayModeChange}
           expansionEnabled={expansionEnabled}
           focusMode={focusMode}
           onFocusModeToggle={onFocusModeToggle}

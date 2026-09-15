@@ -15,7 +15,6 @@ import type { CapturedCredential, CredentialFill } from "../shared/credentials";
 import type { HttpAuthRequest, HttpAuthResponse } from "../shared/httpAuth";
 import type { CompanionModuleInstallStatus } from "../shared/companionModule";
 import type { Swp08Config, Swp08Info } from "../shared/swp08Config";
-import type { CameraDisplayMode } from "../shared/cameraDisplayMode";
 import type { CameraList, TileState, WorkspaceState } from "../shared/types";
 import { resolveCameraAddress } from "../shared/url";
 import {
@@ -588,19 +587,6 @@ function WorkspaceApp({ initialWorkspace }: WorkspaceAppProps): ReactElement {
     });
   }, []);
 
-  const setSelectedDisplayMode = useCallback((displayMode: CameraDisplayMode): void => {
-    const cameraId = selectedTileIdRef.current
-      ? workspaceRef.current.tiles.find((tile) => tile.id === selectedTileIdRef.current)?.cameraId
-      : null;
-    if (!cameraId) {
-      return;
-    }
-    dispatch({
-      type: "updateCameraEntry",
-      cameraId,
-      patch: { displayMode }
-    });
-  }, []);
 
   const selectCameraList = useCallback((cameraListId: string): void => {
     dispatch({ type: "selectCameraList", cameraListId });
@@ -1115,7 +1101,6 @@ function WorkspaceApp({ initialWorkspace }: WorkspaceAppProps): ReactElement {
         onGlobalViewportChange={setGlobalViewport}
         onZoomChange={setSelectedZoom}
         onViewportChange={setSelectedViewport}
-        onDisplayModeChange={setSelectedDisplayMode}
         focusMode={effectiveFocusMode}
         expansionEnabled={expansionEnabled}
         onFocusModeToggle={toggleFocusMode}

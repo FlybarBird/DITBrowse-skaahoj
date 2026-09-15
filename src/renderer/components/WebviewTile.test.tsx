@@ -1127,7 +1127,8 @@ describe("WebviewTile", () => {
     );
   });
 
-  it("auto-detects ARRI LPS pages and isolates the Camera UI iframe", async () => {
+  it("shows an LPS settings gear that navigates to the site root", () => {
+    const onUrlCommitted = vi.fn();
     render(
       <WebviewTile
         tile={{
@@ -1137,6 +1138,29 @@ describe("WebviewTile", () => {
         }}
         selected={true}
         onSelectTile={vi.fn()}
+        onUrlCommitted={onUrlCommitted}
+        onCredentialCaptured={vi.fn()}
+        savedCredential={null}
+        webviewPreloadPath={null}
+      />
+    );
+
+    const gear = screen.getByRole("button", {
+      name: /Open FBS settings/i
+    });
+    fireEvent.click(gear);
+
+    expect(onUrlCommitted).toHaveBeenCalledWith("tile-42", "http://10.201.20.101/");
+    const webview = document.querySelector("webview");
+    expect(webview?.getAttribute("src")).toBe("http://10.201.20.101/");
+  });
+
+  it("does not show the LPS settings gear off /camera pages", () => {
+    render(
+      <WebviewTile
+        tile={tile}
+        selected={true}
+        onSelectTile={vi.fn()}
         onUrlCommitted={vi.fn()}
         onCredentialCaptured={vi.fn()}
         savedCredential={null}
@@ -1144,20 +1168,7 @@ describe("WebviewTile", () => {
       />
     );
 
-    const webview = document.querySelector("webview") as Electron.WebviewTag;
-    webview.getURL = vi.fn(() => "http://10.201.20.101/camera");
-    const executeJavaScript = vi.fn(async (_code: string, _userGesture?: boolean) => "applied");
-    webview.executeJavaScript = executeJavaScript;
-
-    fireEvent(webview, new Event("did-finish-load"));
-
-    await waitFor(() => {
-      expect(executeJavaScript).toHaveBeenCalled();
-    });
-    expect(String(executeJavaScript.mock.calls[0]?.[0])).toContain(
-      'iframe[title="Camera UI"]'
-    );
-    expect(String(executeJavaScript.mock.calls[0]?.[0])).toContain("MutationObserver");
+    expect(screen.queryByRole("button", { name: /Open FBS settings/i })).toBeNull();
   });
 
   it("does not rewrite src after the webview commits its own navigation", () => {
