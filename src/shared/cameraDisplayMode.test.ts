@@ -15,12 +15,15 @@ describe("cameraDisplayMode", () => {
   it("matches ARRI FBS /camera paths", () => {
     expect(isArriLpsCameraPath("http://10.201.20.101/camera")).toBe(true);
     expect(isArriLpsCameraPath("http://10.201.20.101/camera/")).toBe(true);
+    expect(isArriLpsCameraPath("http://10.201.20.101/camera?lang=en")).toBe(true);
     expect(isArriLpsCameraPath("http://10.201.20.101/")).toBe(false);
     expect(isArriLpsCameraPath("http://10.201.20.101/video")).toBe(false);
   });
 
-  it("exports an isolate script that targets the Camera UI iframe", () => {
+  it("exports a detect-and-isolate script for the Camera UI iframe", () => {
     expect(ARRI_LPS_ISOLATE_SCRIPT).toContain('iframe[title="Camera UI"]');
+    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("MutationObserver");
+    expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("Camera Web Remote");
     expect(ARRI_LPS_ISOLATE_SCRIPT).toContain("position:fixed");
   });
 });

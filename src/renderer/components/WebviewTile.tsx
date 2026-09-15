@@ -7,8 +7,7 @@ import type { HostPingStatus } from "../../shared/hostPing";
 import { DEFAULT_HOST_PING_INTERVAL_SECONDS } from "../../shared/hostPing";
 import { CAMERA_WEBVIEW_USER_AGENT } from "../../shared/cameraWebviewUserAgent";
 import {
-  ARRI_LPS_ISOLATE_SCRIPT,
-  isArriLpsCameraPath
+  ARRI_LPS_ISOLATE_SCRIPT
 } from "../../shared/cameraDisplayMode";
 import type { TileState } from "../../shared/types";
 import { normalizeCameraUrl } from "../../shared/url";
@@ -93,11 +92,12 @@ function redirectSonyRootPage(
 }
 
 function applyArriLpsMode(webview: Electron.WebviewTag): void {
-  const currentUrl = typeof webview.getURL === "function" ? webview.getURL() : "";
-  if (!isArriLpsCameraPath(currentUrl) || typeof webview.executeJavaScript !== "function") {
+  if (typeof webview.executeJavaScript !== "function") {
     return;
   }
 
+  // Guest script self-detects LPS (Camera UI iframe / /camera / FBS chrome)
+  // and isolates that frame; non-LPS pages return "skip".
   void webview.executeJavaScript(ARRI_LPS_ISOLATE_SCRIPT, true).catch(() => undefined);
 }
 
@@ -329,9 +329,7 @@ function WebviewTileComponent({
       }
 
       redirectSonyRootPage(webview, commitSonyRootRedirect);
-      if (tile.displayMode === "arriLps") {
-        applyArriLpsMode(webview);
-      }
+      applyArriLpsMode(webview);
     };
     const commitNavigationUrl = (event: Event): void => {
       const navigationEvent = event as Event & { url?: string; isMainFrame?: boolean };
@@ -402,12 +400,11 @@ function WebviewTileComponent({
     onUrlCommitted,
     savedCredential,
     tile.id,
-    tile.displayMode,
     commitSonyRootRedirect
   ]);
 
   useEffect(() => {
-    if (!initialLoadReady || tile.displayMode !== "arriLps") {
+    if (!initialLoadReady || isBlankWebviewUrl(webviewUrl)) {
       return;
     }
 
@@ -416,14 +413,15 @@ function WebviewTileComponent({
       return;
     }
 
-    const timeouts = [250, 1000, 2500, 5000].map((delay) =>
+    // Auto-detect LPS after load / SPA paint — not gated on Display mode.
+    const timeouts = [250, 750, 1500, 3000, 6000, 10000].map((delay) =>
       window.setTimeout(() => applyArriLpsMode(webview), delay)
     );
 
     return () => {
       timeouts.forEach((timeout) => window.clearTimeout(timeout));
     };
-  }, [initialLoadReady, tile.displayMode, webviewUrl]);
+  }, [initialLoadReady, webviewUrl]);
 
   useEffect(() => {
     const webview = webviewRef.current;

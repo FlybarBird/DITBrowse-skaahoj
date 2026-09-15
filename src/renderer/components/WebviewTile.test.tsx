@@ -1127,13 +1127,13 @@ describe("WebviewTile", () => {
     );
   });
 
-  it("isolates the ARRI LPS iframe when display mode is arriLps", async () => {
+  it("auto-detects ARRI LPS pages and isolates the Camera UI iframe", async () => {
     render(
       <WebviewTile
         tile={{
           ...tile,
           url: "http://10.201.20.101/camera",
-          displayMode: "arriLps"
+          displayMode: "default"
         }}
         selected={true}
         onSelectTile={vi.fn()}
@@ -1146,7 +1146,7 @@ describe("WebviewTile", () => {
 
     const webview = document.querySelector("webview") as Electron.WebviewTag;
     webview.getURL = vi.fn(() => "http://10.201.20.101/camera");
-    const executeJavaScript = vi.fn(async (_code: string, _userGesture?: boolean) => true);
+    const executeJavaScript = vi.fn(async (_code: string, _userGesture?: boolean) => "applied");
     webview.executeJavaScript = executeJavaScript;
 
     fireEvent(webview, new Event("did-finish-load"));
@@ -1157,6 +1157,7 @@ describe("WebviewTile", () => {
     expect(String(executeJavaScript.mock.calls[0]?.[0])).toContain(
       'iframe[title="Camera UI"]'
     );
+    expect(String(executeJavaScript.mock.calls[0]?.[0])).toContain("MutationObserver");
   });
 
   it("does not rewrite src after the webview commits its own navigation", () => {
